@@ -36,3 +36,18 @@ function countNegs(board, rowIdx, colIdx) {
     }
     return mineCount
 }
+
+function startTimer() {
+    gStartTime = new Date().getTime()
+    gInterval = setInterval(updateTimer, 37)
+}
+
+function updateTimer() {
+    const currentTime = new Date().getTime()
+    const elapsedTime = (currentTime - gStartTime) / 1000
+    document.querySelector('.timer').innerText = elapsedTime.toFixed(3)
+}
+
+function stopTimer() {
+    clearInterval(gInterval)
+}

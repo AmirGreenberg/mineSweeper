@@ -10,19 +10,64 @@
     <body onload="initGame()">
         <div class="info-container">
             <h1>Mine Sweeper</h1>
-            <!-- <p>Balls Collected: <span class="balls-counter"></span></p>
-              <p>Balls Around You: <span class="neg-counter"></span></p> -->
+            <button onclick="levelModal('toggle')" class="level">
+                Choose Level
+            </button>
+            <button class="darkmode">Enable dark mode</button>
+            <button class="">Ch</button>
+
+            <div class="level-modal hidden">
+                <div>
+                    <button
+                        onclick="levelModal('close')"
+                        class="close-popup-btn"
+                    >
+                        X
+                    </button>
+                </div>
+                <button onclick="chooseLevel(this)" data-level="beginner">
+                    Beginner
+                </button>
+                <br />
+                <button onclick="chooseLevel(this)" data-level="medium">
+                    Medium
+                </button>
+                <br />
+                <button onclick="chooseLevel(this)" data-level="expert">
+                    Expert
+                </button>
+                <br />
+                <br />
+                <button onclick="startNewGame()" class="start-new-game">
+                    Start new game
+                </button>
+                <br />
+              </div>
+              <p>Time: <span class="timer"></span></p>
+              <p>Mines: <span class="mines-counter"></span></p>
+              <p>Strikes Left: <span class="strikes-counter"></span></p>
+              <p>Marks Left: <span class="marks-counter"></span></p>
+            </div>
+            </div>
         </div>
         
+
         <table>
-          <tbody class="board"></tbody>
+            <tbody class="board"></tbody>
         </table>
-        
+
+        <div class="info-container">
+            <button onclick="startNewGame()" class="start-new-game">
+                Start new game
+            </button>
+        </div>
+
+        <br />
         <h2>By Amir Greenberg ™️</h2>
-        
+        <br />
         <div class="play-again-container">
-          <p>You Won!</p>
-          <button onclick="initGame()">Play Again</button>
+            <p>You Won!</p>
+            <button onclick="initGame()">Play Again</button>
         </div>
 
         <script src="js/utils.js"></script>
