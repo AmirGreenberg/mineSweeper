@@ -1,33 +1,56 @@
 'use strict'
 
-const ROWS = 4
-const COLS = 4
-
 const SAFE = 'SAFE'
 const MINE = 'MINE'
 const MINE_SIGN = '💣'
 
-var gBoard
+var gBoard = {
+    minesAroundCount: 4,
+    isShown: false,
+    isMine: false,
+    isMarked: true,
+}
+
+var gLevel = {
+    SIZE: 4,
+    MINES: 2,
+}
+
+var gGame = {
+    isOn: false,
+    shownCount: 0,
+    markedCount: 0,
+    secsPassed: 0,
+}
 
 function initGame() {
     const elPlayAgain = document.querySelector('.play-again-container')
     elPlayAgain.classList.add('hidden')
     gBoard = buildBoard()
-    setMinesNegsCount(gBoard)
+    setminesAroundCount(gBoard)
     renderBoard(gBoard)
 }
 
 function buildBoard() {
-    const board = createMat(ROWS, COLS)
+    const board = createMat(gLevel.SIZE, gLevel.SIZE)
 
-    for (var i = 0; i < ROWS; i++) {
-        for (var j = 0; j < COLS; j++) {
-            var cell = { type: SAFE, minesNegsCount: '' }
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board[0].length; j++) {
+            var cell = {
+                minesAroundCount: '',
+                isShown: false,
+                isMine: false,
+                isMarked: false,
+            }
+
             board[i][j] = cell
         }
     }
-    board[0][0].type = MINE
-    board[1][1].type = MINE
+
+    // board[0][0].isMine = true
+    // board[1][1].isMine = true
+
+    addMines(board)
 
     console.table(board)
     return board
@@ -43,14 +66,14 @@ function renderBoard(board) {
             const currCell = board[i][j]
             var cellClass = getClassName({ i, j })
 
-            if (currCell.type === MINE) cellClass += ' mine'
-            else if (currCell.type === SAFE) cellClass += ' safe'
+            if (currCell.isMine) cellClass += ' mine'
+            else if (!currCell.isMine) cellClass += ' safe'
 
             strHTML += `\t<td class="cell ${cellClass}" 
                         onclick="onCellClicked(this, ${i}, ${j})">
-                        <span class="hidden negCount" >${currCell.minesNegsCount}</span>`
+                        <span class="hidden negCount" >${currCell.minesAroundCount}</span>`
 
-            if (currCell.type === MINE) {
+            if (currCell.isMine) {
                 strHTML += `<span class="hidden mine" >${MINE_SIGN}</span>`
             }
 
@@ -62,12 +85,12 @@ function renderBoard(board) {
     elBoard.innerHTML = strHTML
 }
 
-function setMinesNegsCount(board) {
+function setminesAroundCount(board) {
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[0].length; j++) {
             var currCell = board[i][j]
-            if (currCell.type === MINE) currCell.minesNegsCount = MINE
-            currCell.minesNegsCount = countNegs(board, i, j)
+            if (currCell.isMine) continue
+            currCell.minesAroundCount = countNegs(board, i, j)
         }
     }
     console.log('board: ', board)
@@ -82,7 +105,7 @@ function countNegs(board, rowIdx, colIdx) {
             if (i === rowIdx && j === colIdx) continue
             if (j < 0 || j >= board[0].length) continue
             var currCell = board[i][j]
-            if (currCell.type === MINE) mineCount++
+            if (currCell.isMine) mineCount++
         }
     }
     return mineCount
@@ -96,14 +119,36 @@ function onCellClicked(elCell, i, j) {
 
 function toggleEl(elCell, i, j) {
     const cell = gBoard[i][j]
-    if (cell.type === SAFE) {
+    if (!cell.isMine) {
         const gElSelectedCell = elCell.querySelector('.negCount')
         gElSelectedCell.classList.toggle('hidden')
         elCell.classList.toggle('selected')
-
-    } else if (cell.type === MINE) {
+    } else if (cell.isMine) {
         const gElSelectedCell = elCell.querySelector('.mine')
         gElSelectedCell.classList.toggle('hidden')
         elCell.classList.toggle('selected')
     }
+}
+
+function addMines(board) {
+    for (var i = 0; i < gLevel.MINES; i++) {
+        var idx = findEmptyCell(board)
+        board[idx.i][idx.j].isMine = true
+    }
+}
+
+function findEmptyCell(board) {
+    var emptyCells = []
+
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board[i].length; j++) {
+            if (!board[i][j].isMine) {
+                emptyCells.push({ i, j })
+            }
+        }
+    }
+    if (emptyCells.length === 0) return null
+
+    const idx = getRandomInt(0, emptyCells.length)
+    return emptyCells.splice(idx, 1)[0]
 }
