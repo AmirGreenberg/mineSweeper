@@ -2,13 +2,6 @@
     box-sizing: border-box;
 }
 
-.mine {
-    background: darkblue;
-}
-
-.safe {
-    background: lightcyan;
-}
 .game-container {
     position: absolute;
     top: 50%;
@@ -25,13 +18,13 @@ h1 {
 
 table {
     padding: 1em;
-    border-spacing: 5px 5px;
+    border-spacing: 0.2em 0.2em;
     background-color: #ffe4d6;
     text-align: center;
 }
 
 td {
-    padding: 2em;
+    padding: 0em;
     text-align: center;
     cursor: pointer;
     background-color: #facbea;
@@ -108,22 +101,9 @@ tbody {
 }
 
 .cell {
-    width: 6em;
-    height: 6em;
+    width: 2em;
+    height: 2em;
     text-align: center;
-}
-
-.cell img {
-    width: 1em;
-    height: auto;
-}
-
-.floor {
-    background-color: #739072;
-}
-
-.wall {
-    background-color: #ece3ce;
 }
 
 .hidden {
@@ -156,4 +136,13 @@ tbody {
 .play-again-container button:hover {
     background-color: #dcd3bf;
     font-size: 1em;
+}
+
+.negCount {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.selected {
+    background: linear-gradient(to top, rgb(247, 246, 246), rgb(230, 179, 86));
+    border: 0.1em rgb(196, 40, 40) solid;
 }

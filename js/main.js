@@ -8,29 +8,13 @@ const MINE = 'MINE'
 const MINE_SIGN = '💣'
 
 var gBoard
-// var gGamerPos
-
-// var gGlueInterval
-// var isStuck
-// var gBallsInterval
-// var gCollectedBalls
-// var gBallsCount
-// var gIsGameOver
-// var gIsFirstMove
-// var gEatSound = new Audio('sounds/eat.mp3')
 
 function initGame() {
     const elPlayAgain = document.querySelector('.play-again-container')
     elPlayAgain.classList.add('hidden')
-    // gGamerPos = { i: 2, j: 9 }
-    // gCollectedBalls = 0
-    // gBallsCount = 0
-    // renderBallsCount()
-    // gIsGameOver = false
     gBoard = buildBoard()
     setMinesNegsCount(gBoard)
     renderBoard(gBoard)
-    // renderNegCount()
 }
 
 function buildBoard() {
@@ -42,7 +26,6 @@ function buildBoard() {
             board[i][j] = cell
         }
     }
-
     board[0][0].type = MINE
     board[1][1].type = MINE
 
@@ -63,14 +46,13 @@ function renderBoard(board) {
             if (currCell.type === MINE) cellClass += ' mine'
             else if (currCell.type === SAFE) cellClass += ' safe'
 
-            strHTML += `\t<td class="cell ${cellClass}" onclick="moveTo(${i},${j})"><span class="negCount">${currCell.minesNegsCount}</span>`
+            strHTML += `\t<td class="cell ${cellClass}" 
+                        onclick="onCellClicked(this, ${i}, ${j})">
+                        <span class="hidden negCount" >${currCell.minesNegsCount}</span>`
 
             if (currCell.type === MINE) {
-                strHTML += MINE_SIGN
+                strHTML += `<span class="hidden mine" >${MINE_SIGN}</span>`
             }
-            // } else if (currCell.gameElement === BALL) {
-            //     strHTML += BALL_IMG
-            // }
 
             strHTML += '</td>\n'
         }
@@ -84,7 +66,7 @@ function setMinesNegsCount(board) {
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[0].length; j++) {
             var currCell = board[i][j]
-            if (currCell.type === MINE) continue
+            if (currCell.type === MINE) currCell.minesNegsCount = MINE
             currCell.minesNegsCount = countNegs(board, i, j)
         }
     }
@@ -103,6 +85,25 @@ function countNegs(board, rowIdx, colIdx) {
             if (currCell.type === MINE) mineCount++
         }
     }
-
     return mineCount
+}
+
+function onCellClicked(elCell, i, j) {
+    console.log('elCell: ', elCell)
+    const cell = gBoard[i][j]
+    toggleEl(elCell, i, j)
+}
+
+function toggleEl(elCell, i, j) {
+    const cell = gBoard[i][j]
+    if (cell.type === SAFE) {
+        const gElSelectedCell = elCell.querySelector('.negCount')
+        gElSelectedCell.classList.toggle('hidden')
+        elCell.classList.toggle('selected')
+
+    } else if (cell.type === MINE) {
+        const gElSelectedCell = elCell.querySelector('.mine')
+        gElSelectedCell.classList.toggle('hidden')
+        elCell.classList.toggle('selected')
+    }
 }
