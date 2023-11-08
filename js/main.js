@@ -5,7 +5,7 @@ const COLS = 4
 
 const SAFE = 'SAFE'
 const MINE = 'MINE'
-const MINE_IMG = '<img src="img/cherry.png">'
+const MINE_SIGN = '💣'
 
 var gBoard
 // var gGamerPos
@@ -28,17 +28,17 @@ function initGame() {
     // renderBallsCount()
     // gIsGameOver = false
     gBoard = buildBoard()
+    setMinesNegsCount(gBoard)
     renderBoard(gBoard)
     // renderNegCount()
 }
 
 function buildBoard() {
     const board = createMat(ROWS, COLS)
-    console.log('board: ', board)
 
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLS; j++) {
-            var cell = { type: SAFE, minesNegsCount: 0 }
+            var cell = { type: SAFE, minesNegsCount: '' }
             board[i][j] = cell
         }
     }
@@ -46,7 +46,6 @@ function buildBoard() {
     board[0][0].type = MINE
     board[1][1].type = MINE
 
-    console.log('board: ', board)
     console.table(board)
     return board
 }
@@ -64,10 +63,11 @@ function renderBoard(board) {
             if (currCell.type === MINE) cellClass += ' mine'
             else if (currCell.type === SAFE) cellClass += ' safe'
 
-            strHTML += `\t<td class="cell ${cellClass}" onclick="moveTo(${i},${j})">`
+            strHTML += `\t<td class="cell ${cellClass}" onclick="moveTo(${i},${j})"><span class="negCount">${currCell.minesNegsCount}</span>`
 
-            // if (currCell.type === MINE) {
-            //     strHTML += MINE_IMG
+            if (currCell.type === MINE) {
+                strHTML += MINE_SIGN
+            }
             // } else if (currCell.gameElement === BALL) {
             //     strHTML += BALL_IMG
             // }
@@ -76,7 +76,33 @@ function renderBoard(board) {
         }
         strHTML += '</tr>\n'
     }
-    console.log('strHTML: ', strHTML)
     console.table()
     elBoard.innerHTML = strHTML
+}
+
+function setMinesNegsCount(board) {
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board[0].length; j++) {
+            var currCell = board[i][j]
+            if (currCell.type === MINE) continue
+            currCell.minesNegsCount = countNegs(board, i, j)
+        }
+    }
+    console.log('board: ', board)
+    return board
+}
+
+function countNegs(board, rowIdx, colIdx) {
+    var mineCount = 0
+    for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
+        if (i < 0 || i >= board.length) continue
+        for (var j = colIdx - 1; j <= colIdx + 1; j++) {
+            if (i === rowIdx && j === colIdx) continue
+            if (j < 0 || j >= board[0].length) continue
+            var currCell = board[i][j]
+            if (currCell.type === MINE) mineCount++
+        }
+    }
+
+    return mineCount
 }
