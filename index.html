@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Mine Sweeper</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+
+    <body onload="initGame()">
+        <div class="info-container">
+            <h1>Mine Sweeper</h1>
+            <!-- <p>Balls Collected: <span class="balls-counter"></span></p>
+        <p>Balls Around You: <span class="neg-counter"></span></p> -->
+        </div>
+
+        <table>
+            <tbody class="board"></tbody>
+        </table>
+
+        <div class="play-again-container">
+            <p>You Won!</p>
+            <button onclick="initGame()">Play Again</button>
+        </div>
+
+        <script src="js/utils.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>
