@@ -8,9 +8,13 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Courier New', Courier, monospace;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 h1 {
+    margin: 0;
+    font-size: 1.2em;
     text-align: center;
     color: #d988b9;
     text-align: center;
@@ -21,13 +25,15 @@ h2 {
     text-align: center;
     color: #8e73dd;
     text-align: center;
-    font-size: 1em;
+    font-size: 0.7em;
 }
 
 table {
-    padding: 1em;
+    padding: 0.2em;
     border-spacing: 0.2em 0.2em;
     text-align: center;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 td {
@@ -55,6 +61,7 @@ td {
     border-radius: 5%;
     font-weight: bold;
     text-align: center;
+    margin-top: 0;
 }
 
 .game-level-title {
@@ -97,6 +104,8 @@ button:hover {
 }
 
 table {
+    margin-bottom: 0;
+    margin-top: 0;
     display: flex;
     justify-content: center;
 }
@@ -108,8 +117,8 @@ tbody {
 }
 
 .cell {
-    width: 2em;
-    height: 2em;
+    width: 1.5em;
+    height: 1.5em;
     text-align: center;
 }
 
@@ -122,18 +131,19 @@ tbody {
 }
 
 .play-again-container {
+    height: 2em;
     text-align: center;
-    font-size: 2em;
-    margin-top: 0.5em;
+    font-size: 1.5em;
+    margin-top: 0em;
     color: red;
 }
 
 .play-again-container button {
     background-color: #ece3ce;
     cursor: pointer;
-    padding: 1em;
-    padding-inline: 1em;
-    border-radius: 1em;
+    padding: 0em;
+    padding-inline: 0em;
+    border-radius: 0em;
     transition: 0.2s;
 
     box-shadow: -11px 8px 19px -5px rgba(0, 0, 0, 0.3);
@@ -143,11 +153,14 @@ tbody {
 
 .play-again-container button:hover {
     background-color: #dcd3bf;
-    font-size: 1em;
 }
 
 .negCount {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.8em;
+    padding: 0;
+    margin: 0;
+    text-align: center;
 }
 
 .selected.safe {
@@ -175,15 +188,25 @@ tbody {
 
 .start-new-game {
     background: rgb(234, 237, 222);
-    font-size: x-large;
-    border: 0.1em solid rgb(219, 17, 17);
-    padding: 0;
-    margin: 0;
+    font-size: 0.7em;
+    font-family: monospace;
+    padding: 0.5em;
+    margin: 0.2em;
+    border: 0.05em grey solid;
 }
 
-p{
-  display: inline-block;
-  margin: 1em;
+p {
+    display: inline-block;
+    margin-right: 1.5em;
+    margin-left: 1.5em;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    text-align: center;
+    color: #8e73dd;
+    text-align: center;
+    font-size: 0.7em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 .smiley {
@@ -191,4 +214,22 @@ p{
     font-size: x-large;
     padding: 0;
     margin: 0;
+}
+
+body {
+    padding: 25px;
+    background-color: white;
+    color: black;
+    font-size: 25px;
+}
+
+.dark-mode {
+    background-color: black;
+    color: rgb(102, 83, 83);
+}
+
+.hint {
+    width: 1.5em;
+    margin: 0;
+    padding: 0;
 }

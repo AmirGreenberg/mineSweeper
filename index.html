@@ -10,11 +10,28 @@
     <body onload="initGame()">
         <div class="info-container">
             <h1>Mine Sweeper</h1>
+            <h2>By Amir Greenberg ™️</h2>
             <button onclick="levelModal('toggle')" class="level">
                 Choose Level
             </button>
-            <button class="darkmode">Enable dark mode</button>
-            <button class="">Ch</button>
+            <button class="darkmode" onclick="darkModeToggle()"><span2></span2> Dark mode</button>
+            <div class="all-hints">
+                <img
+                  class="hint"
+                  onclick="onHint(this)"
+                  src="img/hint-white.png"
+                />
+                <img
+                  class="hint"
+                  onclick="onHint(this)"
+                  src="img/hint-white.png"
+                />
+                <img
+                  class="hint"
+                  onclick="onHint(this)"
+                  src="img/hint-white.png"
+                />
+              </div>
 
             <div class="level-modal hidden">
                 <div>
@@ -41,33 +58,34 @@
                 <button onclick="startNewGame()" class="start-new-game">
                     Start new game
                 </button>
-                <br />
-              </div>
-              <br />
+                </div>
               <p>Time: <span class="timer"></span></p>
-              <br />
               <p>Strikes Left: <span class="strikes-counter"></span></p>
+              <br />
               <p>Marks Left: <span class="marks-counter"></span></p>
               <p>Lives Left: <span class="lives-counter"></span></p>
             </div>
             </div>
         </div>
-        <div class="play-again-container">
-            <p class="result"></p>
-        </div>
         <table>
             <tbody class="board"></tbody>
+            <tbody class="board-with-mines"></tbody>
         </table>
-
+        
         <div class="info-container">
             <button onclick="startNewGame()" class="start-new-game">
-              <p class="smiley">😃</p>
+                <p class="smiley"></p>
             </button>
         </div>
-        <h2>By Amir Greenberg ™️</h2>
+        <div class="play-again-container hidden">
+            <p class="result"></p>
+        </div>
+        
         <br />
 
         <script src="js/utils.js"></script>
+        <script src="js/dom.js"></script>
         <script src="js/main.js"></script>
+        
     </body>
 </html>

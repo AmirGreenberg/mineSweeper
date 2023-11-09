@@ -4,11 +4,14 @@ const SAFE = 'SAFE'
 const MINE = 'MINE'
 const MINE_SIGN = '💣'
 const MARKED_SIGN = '🚩'
+const NORMAL_SIGN = 'New Game 😃'
+const LOSE_SIGN = 'New Game 🤯'
+const WIN_SIGN = 'New Game 😎'
 
 var gLevel = {
     ROWS: 4,
     COLS: 4,
-    MINES: 2,
+    MINES: 3,
 }
 
 var gLevelNExtGame
@@ -17,7 +20,8 @@ var gGame
 var gStartTime
 var gInterval
 var gShownTarget
-var gWinOrLose
+var gIsDarkMode = false
+var gHint = {}
 
 function initGame() {
     resetVars()
@@ -29,13 +33,12 @@ function initGame() {
 
 function resetVars() {
     clearInterval(gInterval)
-    gWinOrLose = ''
+    renderHints()
     gStartTime = null
     document.querySelector('.timer').innerText = null
-    const gElCell = document.querySelector('.play-again-container')
-    gElCell.classList.add('hidden')
-    document.querySelector('.smiley').innerText = '😃'
+    document.querySelector('.smiley').innerText = NORMAL_SIGN
     gShownTarget = gLevel.COLS * gLevel.ROWS - gLevel.MINES
+    gHint = { isOn: false, elHint: null }
 
     gBoard = {
         minesAroundCount: '',
@@ -52,6 +55,7 @@ function resetVars() {
         secsPassed: 0,
         mineCount: 0,
         lives: 3,
+        hints: 3,
     }
 }
 
@@ -71,43 +75,13 @@ function buildBoard() {
         }
     }
 
-    board[0][0].isMine = true
-    board[1][1].isMine = true
-    board[2][2].isMine = true
+    // board[0][0].isMine = true
+    // board[1][1].isMine = true
+    // board[2][2].isMine = true
 
-    // addMines(board)
+    addMines(board)
 
     return board
-}
-
-function renderBoard(board) {
-    var strHTML = ''
-    const elBoard = document.querySelector('.board')
-
-    for (var i = 0; i < board.length; i++) {
-        strHTML += '<tr>\n'
-        for (var j = 0; j < board[i].length; j++) {
-            const currCell = board[i][j]
-            var cellClass = getClassName({ i, j })
-
-            if (currCell.isMine) cellClass += ' mine'
-            else if (!currCell.isMine) cellClass += ' safe'
-
-            strHTML += `\t<td class="cell ${cellClass}" 
-                        onclick="onCellClicked(this, ${i}, ${j})"
-                        oncontextmenu="onCellMarked(this, ${i}, ${j})">
-                        <span class="hidden negCount" >${currCell.minesAroundCount}</span>
-                        <span class="hidden marked" >${MARKED_SIGN}</span>`
-
-            if (currCell.isMine) {
-                strHTML += `<span class="hidden mine" >${MINE_SIGN}</span>`
-            }
-
-            strHTML += '</td>\n'
-        }
-        strHTML += '</tr>\n'
-    }
-    elBoard.innerHTML = strHTML
 }
 
 function setMinesAroundCount(board) {
@@ -128,8 +102,13 @@ function onCellClicked(elCell, i, j) {
     if (currCell.isMarked) return
     if (!gGame.isOn && !gGame.isFirstMove) return
 
+    if (gHint.isOn) {
+        renderClickedCell(elCell, i, j)
+        gGame.hints--
+        return
+    }
     if (gGame.isFirstMove) {
-        startTime()
+        startTimer()
         gGame.isFirstMove = false
         gGame.isOn = true
     }
@@ -151,70 +130,6 @@ function onCellClicked(elCell, i, j) {
     if (checkifWin()) winGame(gGame, elCell, i, j)
 
     expandShown(gBoard, elCell, i, j)
-}
-
-function onCellMarked(elCell, i, j) {
-    window.addEventListener('contextmenu', (e) => e.preventDefault())
-    const currCell = gBoard[i][j]
-    var diff = currCell.isMarked ? -1 : 1
-    currCell.isMarked = !currCell.isMarked
-    gGame.markedCount += diff
-
-    renderMarkedCell(elCell, i, j)
-    renderScoreBoard()
-
-    if (checkifWin()) gameOver(elCell, i, j)
-}
-
-function renderClickedCell(elCell, i, j) {
-    const currCell = gBoard[i][j]
-    if (!currCell.isMine) {
-        const gElSelectedCell = elCell.querySelector('.negCount')
-        gElSelectedCell.classList.remove('hidden')
-        elCell.classList.add('selected')
-    } else if (currCell.isMine) {
-        const gElSelectedCell = elCell.querySelector('.mine')
-        gElSelectedCell.classList.remove('hidden')
-        if (gGame.mineCount === 0) elCell.classList.add('selected')
-    }
-    if (currCell.isMine && gGame.lives > 1) {
-        const gElSelectedCell = elCell.querySelector('.mine')
-        setTimeout(() => gElSelectedCell.classList.add('hidden'), 200)
-        setTimeout(() => elCell.classList.remove('selected'), 200)
-    }
-}
-
-function renderMarkedCell(elCell, i, j) {
-    const gElSelectedCell = elCell.querySelector('.marked')
-    gElSelectedCell.classList.toggle('hidden')
-}
-
-function addMines(board) {
-    for (var i = 0; i < gLevel.MINES; i++) {
-        var idx = findEmptyCell(board)
-        board[idx.i][idx.j].isMine = true
-    }
-}
-
-function findEmptyCell(board) {
-    var emptyCells = []
-
-    for (var i = 0; i < board.length; i++) {
-        for (var j = 0; j < board[i].length; j++) {
-            if (!board[i][j].isMine) {
-                emptyCells.push({ i, j })
-            }
-        }
-    }
-    if (emptyCells.length === 0) return null
-
-    const idx = getRandomInt(0, emptyCells.length)
-    return emptyCells.splice(idx, 1)[0]
-}
-
-function checkifWin() {
-    if (gGame.shownCount === gShownTarget && gGame.markedCount === gLevel.MINES)
-        winGame()
 }
 
 function expandShown(board, elCell, rowIdx, colIdx) {
@@ -243,8 +158,29 @@ function expandShown(board, elCell, rowIdx, colIdx) {
     }
 }
 
-function startTime() {
-    startTimer()
+function onCellMarked(elCell, i, j) {
+    window.addEventListener('contextmenu', (e) => e.preventDefault())
+    const currCell = gBoard[i][j]
+    var diff = currCell.isMarked ? -1 : 1
+    currCell.isMarked = !currCell.isMarked
+    gGame.markedCount += diff
+
+    renderMarkedCell(elCell, i, j)
+    renderScoreBoard()
+
+    if (checkifWin()) gameOver(elCell, i, j)
+}
+
+function addMines(board) {
+    for (var i = 0; i < gLevel.MINES; i++) {
+        var idx = findEmptyCell(board)
+        board[idx.i][idx.j].isMine = true
+    }
+}
+
+function checkifWin() {
+    if (gGame.shownCount === gShownTarget && gGame.markedCount === gLevel.MINES)
+        winGame()
 }
 
 function gameOver() {
@@ -257,6 +193,7 @@ function winGame() {
     elBoard.innerText = 'You Won 🥳!'
     const gElCell = document.querySelector('.play-again-container')
     gElCell.classList.remove('hidden')
+    document.querySelector('.smiley').innerText = WIN_SIGN
     gameOver()
 }
 
@@ -265,8 +202,7 @@ function loseGame(board, elCell, rowIdx, colIdx) {
     elBoard.innerText = 'You Lost 😔'
     const gElCell = document.querySelector('.play-again-container')
     gElCell.classList.remove('hidden')
-    document.querySelector('.smiley').innerText = '🤯'
-    console.log('smiley: ', smiley)
+    document.querySelector('.smiley').innerText = LOSE_SIGN
 
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[0].length; j++) {
@@ -284,29 +220,7 @@ function loseGame(board, elCell, rowIdx, colIdx) {
             }
         }
     }
-
     gameOver()
-}
-
-function levelModal(toDO) {
-    const elLevel = document.querySelector('.level-modal')
-
-    switch (toDO) {
-        case 'close':
-            elLevel.classList.add('hidden')
-            break
-
-        case 'open':
-            elLevel.classList.remove('hidden')
-            break
-
-        case 'toggle':
-            elLevel.classList.toggle('hidden')
-            break
-
-        default:
-            elLevel.classList.toggle('hidden')
-    }
 }
 
 function chooseLevel(elLevel) {
@@ -317,7 +231,7 @@ function chooseLevel(elLevel) {
             gLevelNExtGame = {
                 ROWS: 4,
                 COLS: 4,
-                MINES: 2,
+                MINES: 3,
             }
             break
 
@@ -325,7 +239,7 @@ function chooseLevel(elLevel) {
             gLevelNExtGame = {
                 ROWS: 8,
                 COLS: 8,
-                MINES: 2, //14
+                MINES: 14, //14
             }
             break
 
@@ -333,7 +247,7 @@ function chooseLevel(elLevel) {
             gLevelNExtGame = {
                 ROWS: 12,
                 COLS: 12,
-                MINES: 2, //32
+                MINES: 32, //32
             }
             break
 
@@ -341,7 +255,7 @@ function chooseLevel(elLevel) {
             gLevelNExtGame = {
                 ROWS: 4,
                 COLS: 4,
-                MINES: 2,
+                MINES: 3,
             }
     }
 }
@@ -355,13 +269,18 @@ function startNewGame() {
     initGame()
 }
 
-function renderScoreBoard() {
-    var strikeCounter = gShownTarget - gGame.shownCount
-    document.querySelector('.strikes-counter').innerText = strikeCounter
+function onHint(elHint) {
+    if (!gGame.isOn || (gHint.isOn && gHint.elHint !== elHint)) return
 
-    var marksCounter = gLevel.MINES - gGame.markedCount
-    document.querySelector('.marks-counter').innerText = marksCounter
+    // if (gHint.isOn) {
+    //     gHint.isOn = false
+    //     gHint.elHint = null
+    //     elHint.src = 'img/hint-white.png'
+    //     return
+    // }
 
-    var livesCounter = gGame.lives
-    document.querySelector('.lives-counter').innerText = livesCounter
+    gHint.isOn = true
+    gHint.elHint = elHint
+    elHint.src = 'img/hint-yellow.png'
+    // elHint.src = ''
 }

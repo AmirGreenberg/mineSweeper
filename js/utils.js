@@ -49,6 +49,9 @@ function updateTimer() {
 }
 
 function stopTimer() {
+    var finalTime = document.querySelector('.timer').innerText
+    var level = gLevel.ROWS * gLevel.COLS 
+    localStorage.setItem(`${level}`, finalTime)
     clearInterval(gInterval)
 }
 
@@ -65,7 +68,12 @@ function findEmptyCell(board) {
 
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[i].length; j++) {
-            if (!board[i][j].isMine && !board[i][j].isMarked) {
+            var currLocation = { i, j }
+            if (
+                !board[i][j].isMine &&
+                !board[i][j].isMarked &&
+                currLocation !== gBoard.firstCell
+            ) {
                 emptyCells.push({ i, j })
             }
         }
