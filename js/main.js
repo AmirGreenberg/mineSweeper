@@ -17,6 +17,7 @@ var gGame
 var gStartTime
 var gInterval
 var gShownTarget
+var gWinOrLose
 
 function initGame() {
     resetVars()
@@ -28,12 +29,16 @@ function initGame() {
 
 function resetVars() {
     clearInterval(gInterval)
+    gWinOrLose = ''
     gStartTime = null
     document.querySelector('.timer').innerText = null
+    const gElCell = document.querySelector('.play-again-container')
+    gElCell.classList.add('hidden')
+    document.querySelector('.smiley').innerText = '😃'
     gShownTarget = gLevel.COLS * gLevel.ROWS - gLevel.MINES
 
     gBoard = {
-        minesAroundCount: 0,
+        minesAroundCount: '',
         isShown: false,
         isMine: false,
         isMarked: false,
@@ -41,10 +46,12 @@ function resetVars() {
 
     gGame = {
         isOn: false,
+        isFirstMove: true,
         shownCount: 0,
         markedCount: 0,
         secsPassed: 0,
         mineCount: 0,
+        lives: 3,
     }
 }
 
@@ -65,11 +72,11 @@ function buildBoard() {
     }
 
     board[0][0].isMine = true
-    board[0][1].isMine = true
+    board[1][1].isMine = true
+    board[2][2].isMine = true
 
     // addMines(board)
 
-    console.table(board)
     return board
 }
 
@@ -100,7 +107,6 @@ function renderBoard(board) {
         }
         strHTML += '</tr>\n'
     }
-    console.table()
     elBoard.innerHTML = strHTML
 }
 
@@ -110,9 +116,9 @@ function setMinesAroundCount(board) {
             var currCell = board[i][j]
             if (currCell.isMine) continue
             currCell.minesAroundCount = countNegs(board, i, j)
+            if (!currCell.minesAroundCount) currCell.minesAroundCount = ''
         }
     }
-    console.log('board: ', board)
     return board
 }
 
@@ -120,23 +126,31 @@ function onCellClicked(elCell, i, j) {
     const currCell = gBoard[i][j]
     if (currCell.isShown) return
     if (currCell.isMarked) return
+    if (!gGame.isOn && !gGame.isFirstMove) return
 
-    if (!gGame.isOn) startTime()
-    if (currCell.isMine) {
-        renderClickedCell(elCell, i, j)
-        loseGame(gGame, elCell, i, j)
+    if (gGame.isFirstMove) {
+        startTime()
+        gGame.isFirstMove = false
+        gGame.isOn = true
     }
 
-    console.log('elCell: ', elCell)
+    if (currCell.isMine) {
+        renderClickedCell(elCell, i, j)
+        gGame.lives--
+        renderScoreBoard()
+        if (!gGame.lives) loseGame(gBoard, elCell, i, j)
+        return
+    }
 
     currCell.isShown = true
     gGame.shownCount++
 
     renderClickedCell(elCell, i, j)
-    expandShown(gBoard, elCell, i, j)
+    renderScoreBoard()
+
     if (checkifWin()) winGame(gGame, elCell, i, j)
 
-    console.log('gGame: ', gGame)
+    expandShown(gBoard, elCell, i, j)
 }
 
 function onCellMarked(elCell, i, j) {
@@ -147,9 +161,7 @@ function onCellMarked(elCell, i, j) {
     gGame.markedCount += diff
 
     renderMarkedCell(elCell, i, j)
-
-    console.log('elCell: ', currCell)
-    console.log('gGame: ', gGame)
+    renderScoreBoard()
 
     if (checkifWin()) gameOver(elCell, i, j)
 }
@@ -164,6 +176,11 @@ function renderClickedCell(elCell, i, j) {
         const gElSelectedCell = elCell.querySelector('.mine')
         gElSelectedCell.classList.remove('hidden')
         if (gGame.mineCount === 0) elCell.classList.add('selected')
+    }
+    if (currCell.isMine && gGame.lives > 1) {
+        const gElSelectedCell = elCell.querySelector('.mine')
+        setTimeout(() => gElSelectedCell.classList.add('hidden'), 200)
+        setTimeout(() => elCell.classList.remove('selected'), 200)
     }
 }
 
@@ -196,12 +213,8 @@ function findEmptyCell(board) {
 }
 
 function checkifWin() {
-    renderScoreBoard()
-
     if (gGame.shownCount === gShownTarget && gGame.markedCount === gLevel.MINES)
         winGame()
-
-    console.log('checkGameOver')
 }
 
 function expandShown(board, elCell, rowIdx, colIdx) {
@@ -217,56 +230,66 @@ function expandShown(board, elCell, rowIdx, colIdx) {
             if (currCell.isMine) continue
             if (!currCell.isShown && !currCell.isMarked) {
                 currCell.isShown = true
+
                 gGame.shownCount++
+
                 var cellClass = '.' + getClassName({ i, j })
                 var elCell = document.querySelector(cellClass)
                 renderClickedCell(elCell, i, j)
+                renderScoreBoard()
+                expandShown(board, elCell, i, j)
             }
         }
     }
 }
 
 function startTime() {
-    gGame.isOn = true
     startTimer()
 }
 
 function gameOver() {
     gGame.isOn = false
-    console.log('gameOver')
     stopTimer()
 }
 
 function winGame() {
-    console.log('You won ')
+    const elBoard = document.querySelector('.result')
+    elBoard.innerText = 'You Won 🥳!'
+    const gElCell = document.querySelector('.play-again-container')
+    gElCell.classList.remove('hidden')
     gameOver()
 }
 
 function loseGame(board, elCell, rowIdx, colIdx) {
-    console.log('You lost ')
-    gameOver()
+    const elBoard = document.querySelector('.result')
+    elBoard.innerText = 'You Lost 😔'
+    const gElCell = document.querySelector('.play-again-container')
+    gElCell.classList.remove('hidden')
+    document.querySelector('.smiley').innerText = '🤯'
+    console.log('smiley: ', smiley)
+
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[0].length; j++) {
             if (i === rowIdx && j === colIdx) continue
             var currCell = board[i][j]
+
             if (currCell.isShown) continue
             if (!currCell.isShown && currCell.isMine) {
                 currCell.isShown = true
                 var cellClass = '.' + getClassName({ i, j })
                 var elCell = document.querySelector(cellClass)
                 gGame.mineCount++
-                console.log('gGame.shownCount++: ', gGame.shownCount++)
 
                 renderClickedCell(elCell, i, j)
             }
         }
     }
+
+    gameOver()
 }
 
 function levelModal(toDO) {
     const elLevel = document.querySelector('.level-modal')
-    console.log('elLevel: ', elLevel)
-    console.log('elLevel.classList: ', elLevel.classList)
 
     switch (toDO) {
         case 'close':
@@ -287,11 +310,7 @@ function levelModal(toDO) {
 }
 
 function chooseLevel(elLevel) {
-    var elLevels = document.querySelector('.level-modal')
-    console.log('elLevels: ', elLevels)
-
-    elLevel.classList.add('clicked')
-    console.log('elLevel.dataset.level: ', elLevel.dataset.level)
+    removeLevelClass(elLevel)
 
     switch (elLevel.dataset.level) {
         case 'beginner':
@@ -337,11 +356,12 @@ function startNewGame() {
 }
 
 function renderScoreBoard() {
-    document.querySelector('.mines-counter').innerText = gGame.shownCount
+    var strikeCounter = gShownTarget - gGame.shownCount
+    document.querySelector('.strikes-counter').innerText = strikeCounter
 
-    document.querySelector('.strikes-counter').innerText =
-        gShownTarget - gGame.shownCount
+    var marksCounter = gLevel.MINES - gGame.markedCount
+    document.querySelector('.marks-counter').innerText = marksCounter
 
-    document.querySelector('.marks-counter').innerText =
-        gLevel.MINES - gGame.markedCount
+    var livesCounter = gGame.lives
+    document.querySelector('.lives-counter').innerText = livesCounter
 }

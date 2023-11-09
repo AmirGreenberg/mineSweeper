@@ -25,15 +25,15 @@
                         X
                     </button>
                 </div>
-                <button onclick="chooseLevel(this)" data-level="beginner">
+                <button class="levelBtn" onclick="chooseLevel(this)" data-level="beginner">
                     Beginner
                 </button>
                 <br />
-                <button onclick="chooseLevel(this)" data-level="medium">
+                <button class="levelBtn" onclick="chooseLevel(this)" data-level="medium">
                     Medium
                 </button>
                 <br />
-                <button onclick="chooseLevel(this)" data-level="expert">
+                <button class="levelBtn" onclick="chooseLevel(this)" data-level="expert">
                     Expert
                 </button>
                 <br />
@@ -43,32 +43,29 @@
                 </button>
                 <br />
               </div>
+              <br />
               <p>Time: <span class="timer"></span></p>
-              <p>Mines: <span class="mines-counter"></span></p>
+              <br />
               <p>Strikes Left: <span class="strikes-counter"></span></p>
               <p>Marks Left: <span class="marks-counter"></span></p>
+              <p>Lives Left: <span class="lives-counter"></span></p>
             </div>
             </div>
         </div>
-        
-
+        <div class="play-again-container">
+            <p class="result"></p>
+        </div>
         <table>
             <tbody class="board"></tbody>
         </table>
 
         <div class="info-container">
             <button onclick="startNewGame()" class="start-new-game">
-                Start new game
+              <p class="smiley">😃</p>
             </button>
         </div>
-
-        <br />
         <h2>By Amir Greenberg ™️</h2>
         <br />
-        <div class="play-again-container">
-            <p>You Won!</p>
-            <button onclick="initGame()">Play Again</button>
-        </div>
 
         <script src="js/utils.js"></script>
         <script src="js/main.js"></script>

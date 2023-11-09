@@ -51,3 +51,27 @@ function updateTimer() {
 function stopTimer() {
     clearInterval(gInterval)
 }
+
+function removeLevelClass(elLevel) {
+    var elBtns = document.querySelectorAll('.levelBtn')
+    for (var i = 0; i < elBtns.length; i++) {
+        elBtns[i].classList.remove('clicked')
+    }
+    elLevel.classList.add('clicked')
+}
+
+function findEmptyCell(board) {
+    var emptyCells = []
+
+    for (var i = 0; i < board.length; i++) {
+        for (var j = 0; j < board[i].length; j++) {
+            if (!board[i][j].isMine && !board[i][j].isMarked) {
+                emptyCells.push({ i, j })
+            }
+        }
+    }
+    if (emptyCells.length === 0) return null
+
+    const idx = getRandomInt(0, emptyCells.length)
+    return emptyCells.splice(idx, 1)[0]
+}
