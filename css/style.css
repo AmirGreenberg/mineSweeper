@@ -233,3 +233,24 @@ body {
     margin: 0;
     padding: 0;
 }
+
+.leaderboard td {
+    padding-right: 2em;
+    border: 0;
+    background-color: white;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS',
+        sans-serif;
+    font-size: 0.7em;
+    text-align: center;
+}
+
+.leaderboard .header td {
+    font-size: 1em;
+    text-align: center;
+}
+
+.leaderboard-topic{
+    font-size: 1.2em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #3a3ae9;
+}

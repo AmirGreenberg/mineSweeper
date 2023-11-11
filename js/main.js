@@ -26,14 +26,13 @@ var gHint = {}
 function initGame() {
     resetVars()
     gBoard = buildBoard()
-    setMinesAroundCount(gBoard)
     renderBoard(gBoard)
     renderScoreBoard()
 }
 
 function resetVars() {
     clearInterval(gInterval)
-    renderHints()
+    resetHints()
     gStartTime = null
     document.querySelector('.timer').innerText = null
     document.querySelector('.smiley').innerText = NORMAL_SIGN
@@ -45,6 +44,7 @@ function resetVars() {
         isShown: false,
         isMine: false,
         isMarked: false,
+        firstCellIdx: {},
     }
 
     gGame = {
@@ -70,17 +70,9 @@ function buildBoard() {
                 isMine: false,
                 isMarked: false,
             }
-
             board[i][j] = cell
         }
     }
-
-    // board[0][0].isMine = true
-    // board[1][1].isMine = true
-    // board[2][2].isMine = true
-
-    addMines(board)
-
     return board
 }
 
@@ -105,31 +97,40 @@ function onCellClicked(elCell, i, j) {
     if (gHint.isOn) {
         renderClickedCell(elCell, i, j)
         gGame.hints--
+        gHint.isOn = false
         return
     }
+
     if (gGame.isFirstMove) {
-        startTimer()
-        gGame.isFirstMove = false
-        gGame.isOn = true
+        handleFirstMove(elCell, i, j)
+        return
     }
 
     if (currCell.isMine) {
-        renderClickedCell(elCell, i, j)
         gGame.lives--
-        renderScoreBoard()
         if (!gGame.lives) loseGame(gBoard, elCell, i, j)
-        return
     }
 
-    currCell.isShown = true
-    gGame.shownCount++
+    if (!currCell.isMine) {
+        currCell.isShown = true
+        gGame.shownCount++
+        expandShown(gBoard, elCell, i, j)
+        if (checkifWin()) winGame(gGame, elCell, i, j)
+    }
 
     renderClickedCell(elCell, i, j)
     renderScoreBoard()
+}
 
-    if (checkifWin()) winGame(gGame, elCell, i, j)
-
-    expandShown(gBoard, elCell, i, j)
+function handleFirstMove(elCell, i, j) {
+    startTimer()
+    gGame.isOn = true
+    gBoard.firstCellIdx = { i, j }
+    addMines(gBoard)
+    setMinesAroundCount(gBoard)
+    renderBoard(gBoard)
+    gGame.isFirstMove = false
+    onCellClicked(elCell, i, j)
 }
 
 function expandShown(board, elCell, rowIdx, colIdx) {
@@ -147,7 +148,6 @@ function expandShown(board, elCell, rowIdx, colIdx) {
                 currCell.isShown = true
 
                 gGame.shownCount++
-
                 var cellClass = '.' + getClassName({ i, j })
                 var elCell = document.querySelector(cellClass)
                 renderClickedCell(elCell, i, j)
@@ -161,6 +161,7 @@ function expandShown(board, elCell, rowIdx, colIdx) {
 function onCellMarked(elCell, i, j) {
     window.addEventListener('contextmenu', (e) => e.preventDefault())
     const currCell = gBoard[i][j]
+    if (currCell.isShown) return
     var diff = currCell.isMarked ? -1 : 1
     currCell.isMarked = !currCell.isMarked
     gGame.markedCount += diff
@@ -186,40 +187,32 @@ function checkifWin() {
 function gameOver() {
     gGame.isOn = false
     stopTimer()
+
+    
 }
 
 function winGame() {
     const elBoard = document.querySelector('.result')
     elBoard.innerText = 'You Won 🥳!'
-    const gElCell = document.querySelector('.play-again-container')
-    gElCell.classList.remove('hidden')
+    const elPlayAgain = document.querySelector('.play-again-container')
+    elPlayAgain.classList.remove('hidden')
     document.querySelector('.smiley').innerText = WIN_SIGN
     gameOver()
+
+    var name = prompt('What is Your name?')
+    var finalTime = +document.querySelector('.timer').innerText
+    localStorage.setItem('time', finalTime)
+    var level = gLevel.ROWS * gLevel.COLS
+    gLevel1.push({ time: finalTime, name: name })
+    console.log('gLevel1: ', gLevel1)
+    sortObjByNum(gLevel1)
+    sortObjByNum(gLevel2)
+    sortObjByNum(gLevel3)
 }
 
 function loseGame(board, elCell, rowIdx, colIdx) {
-    const elBoard = document.querySelector('.result')
-    elBoard.innerText = 'You Lost 😔'
-    const gElCell = document.querySelector('.play-again-container')
-    gElCell.classList.remove('hidden')
-    document.querySelector('.smiley').innerText = LOSE_SIGN
-
-    for (var i = 0; i < board.length; i++) {
-        for (var j = 0; j < board[0].length; j++) {
-            if (i === rowIdx && j === colIdx) continue
-            var currCell = board[i][j]
-
-            if (currCell.isShown) continue
-            if (!currCell.isShown && currCell.isMine) {
-                currCell.isShown = true
-                var cellClass = '.' + getClassName({ i, j })
-                var elCell = document.querySelector(cellClass)
-                gGame.mineCount++
-
-                renderClickedCell(elCell, i, j)
-            }
-        }
-    }
+    renderPlayAgain()
+    renderAllMines(board, elCell, rowIdx, colIdx)
     gameOver()
 }
 
@@ -270,17 +263,43 @@ function startNewGame() {
 }
 
 function onHint(elHint) {
-    if (!gGame.isOn || (gHint.isOn && gHint.elHint !== elHint)) return
-
-    // if (gHint.isOn) {
-    //     gHint.isOn = false
-    //     gHint.elHint = null
-    //     elHint.src = 'img/hint-white.png'
-    //     return
-    // }
-
+    if (!gGame.isOn) return
     gHint.isOn = true
     gHint.elHint = elHint
     elHint.src = 'img/hint-yellow.png'
-    // elHint.src = ''
+}
+
+var gLeaderBoard = {
+    levels: [gLevel1, gLevel2, gLevel3],
+    ranks: 10,
+}
+
+var gLevel1 = [
+    { time: 6.2, name: 'test1' },
+    { time: 21.4, name: 'test2' },
+    { time: 3, name: 'test3' },
+    { time: 70, name: 'test4' },
+    { time: 1, name: 'test5' },
+]
+
+var gLevel2 = [
+    { time: 6.2, name: 'test1' },
+    { time: 21.4, name: 'test2' },
+    { time: 3, name: 'test3' },
+    { time: 70, name: 'test4' },
+    { time: 1, name: 'test5' },
+]
+
+var gLevel3 = [
+    { time: 6.2, name: 'test1' },
+    { time: 21.4, name: 'test2' },
+    { time: 3, name: 'test3' },
+    { time: 70, name: 'test4' },
+    { time: 1, name: 'test5' },
+]
+
+//sorting objects in array by num
+function sortObjByNum(leaderBoard) {
+    leaderBoard.sort((l1, l2) => l1.time - l2.time)
+    console.log('players by score:', leaderBoard)
 }
